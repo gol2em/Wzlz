@@ -29,6 +29,8 @@ game-client = [
     "pillow>=9.0.0",
     "pyautogui>=0.9.53",
     "pytesseract>=0.3.10",
+    "opencv-python>=4.5.0",
+    "pywin32>=300; platform_system=='Windows'",
 ]
 dev = [
     "pytest>=7.0.0",
