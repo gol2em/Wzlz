@@ -4,7 +4,32 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="edecd0d8-0bc3-413c-96c3-3df03dd0a238" name="Changes" comment="" />
+    <list default="true" id="edecd0d8-0bc3-413c-96c3-3df03dd0a238" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/docs/GAME_CLIENT_INTEGRATION.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/capture_and_detect.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/capture_window.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/debug_from_screenshot.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/manual_calibrate.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/manual_calibrate_all.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/play_full_game.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/test_full_game_with_reset.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/test_game_client_env.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/test_game_over_popup.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/test_game_reset.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/test_live_capture.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/test_live_move.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/test_manual_game_over.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/test_multiple_moves.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/test_popup_auto.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/test_popup_debug.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/test_popup_detection.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/test_popup_manual_verify.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/test_reset_with_popup.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/unified_capture.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wzlz_ai/game_client.py" beforeDir="false" afterPath="$PROJECT_DIR$/wzlz_ai/game_client.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -28,6 +53,8 @@
   "keyToString": {
     "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python.debug_grid_detection.executor": "Run",
+    "Python.manual_calibrate.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",

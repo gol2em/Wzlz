@@ -114,61 +114,89 @@ python examples/example_usage.py
 - **[QUICKSTART.md](QUICKSTART.md)** - Step-by-step guide to get started
 - **[FRAMEWORK_DESIGN.md](FRAMEWORK_DESIGN.md)** - Detailed architecture and design decisions
 
-## 🎮 Game Client Setup
+## 🎮 Game Client Integration
 
-To interact with the actual game:
+The framework now includes full integration with the actual game window!
 
-1. Install game client dependencies: `pip install -e ".[game-client]"`
-2. Open the game (五子连珠5.2)
-3. Measure the board position and cell size
-4. Calibrate the client:
+### Setup
 
-```python
-from wzlz_ai import GameClientEnvironment, GameConfig
+1. **Install dependencies:**
+   ```bash
+   uv pip install pywin32 opencv-python pillow
+   ```
 
-config = GameConfig()
-env = GameClientEnvironment(config)
+2. **Calibrate the game window:**
+   ```bash
+   uv run python examples/manual_calibrate_all.py
+   ```
+   This creates `game_window_config.json` with the board and UI regions.
 
-# Calibrate with your measurements
-env.calibrate(
-    board_rect=(220, 145, 490, 490),  # (x, y, width, height)
-    cell_size=54  # pixels per cell
-)
+3. **Use the GameClientEnvironment:**
+   ```python
+   from wzlz_ai import GameClientEnvironment, GameConfig
 
-# Read game state
-state = env.get_state()
+   config = GameConfig(show_next_balls=True)
+   env = GameClientEnvironment(config)
 
-# Execute moves (will click on game window)
-moves = env.get_valid_moves()
-result = env.execute_move(moves[0])
+   # Reset the game (press F4)
+   state = env.reset()
+
+   # Get valid moves
+   moves = env.get_valid_moves(state)
+
+   # Execute a move (will click on game window)
+   result = env.execute_move(moves[0])
+   ```
+
+### Test Scripts
+
+```bash
+# Test window capture
+uv run python examples/capture_window.py
+
+# Test multiple moves
+uv run python examples/test_multiple_moves.py
+
+# Test environment integration
+uv run python examples/test_game_client_env.py
+
+# Test game reset (F4)
+uv run python examples/test_game_reset.py
+
+# Play a full game
+uv run python examples/play_full_game.py
 ```
 
-## 🔧 What You Need to Implement
+### Features
 
-### Priority 1: Game Rules ⚠️
+✅ **Window capture** - Captures game window using Windows API
+✅ **Ball detection** - Detects balls using color matching
+✅ **Mouse control** - Simulates clicks to make moves
+✅ **Game reset** - Presses F4 to restart the game
+✅ **Full game loop** - Can play complete games until game over
 
-The matching logic is not yet implemented. You need to complete:
+See [docs/GAME_CLIENT_INTEGRATION.md](docs/GAME_CLIENT_INTEGRATION.md) for detailed documentation.
 
-**File**: `game_environment.py`  
-**Function**: `SimulationEnvironment._check_and_remove_matches()`
+## ✅ Current Status
 
-This function should:
-1. Check for horizontal, vertical, and diagonal matches
-2. Remove matched balls (5+ in a row)
-3. Calculate and return points
+**Complete:**
+- ✅ Core game state and rules (17/17 tests passing)
+- ✅ Simulation environment (fast training)
+- ✅ Game client environment (real game interaction)
+- ✅ Window capture and calibration
+- ✅ Ball detection using color matching
+- ✅ Mouse control for moves
+- ✅ Game reset (F4)
+- ✅ Full game loop support
 
-### Priority 2: Image Recognition (for Game Client)
+**In Progress:**
+- 🚧 Score reading from screen (OCR)
+- 🚧 Next balls preview detection
+- 🚧 AI agent implementation
 
-**File**: `game_client.py`  
-**Functions**:
-- `_parse_board()` - Detect balls from screenshot
-- `_read_score()` - Read score using OCR
-- `_read_next_balls()` - Read next balls preview
+## 🤖 Next Steps: AI Training
 
-### Priority 3: Your ML Model
-
-Create your own model to select moves. Options:
-- Random baseline
+Create your own AI agent to play the game. Options:
 - Heuristic-based
 - Deep Q-Network (DQN)
 - Policy Gradient
