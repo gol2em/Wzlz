@@ -22,23 +22,52 @@ A flexible framework for training AI models to play the ball matching game (五�
 
 ```
 .
-├── game_state.py           # Core data structures (GameState, Move, Position, etc.)
-├── game_environment.py     # Abstract interface + SimulationEnvironment
-├── game_client.py          # GameClientEnvironment for real game interaction
-├── example_usage.py        # Comprehensive usage examples
-├── test_framework.py       # Framework tests (run this first!)
-├── requirements.txt        # Python dependencies
+├── wzlz_ai/                # Main package
+│   ├── __init__.py
+│   ├── game_state.py       # Core data structures
+│   ├── game_environment.py # Simulation environment
+│   └── game_client.py      # Game client interface
+├── examples/               # Usage examples
+│   ├── example_usage.py
+│   └── game_rules_template.py
+├── tests/                  # Test suite
+│   └── test_framework.py
+├── pyproject.toml          # Project configuration
+├── README.md               # This file
 ├── QUICKSTART.md          # Quick start guide
-├── FRAMEWORK_DESIGN.md    # Detailed design documentation
-└── README.md              # This file
+└── FRAMEWORK_DESIGN.md    # Detailed design documentation
 ```
 
 ## 🚀 Quick Start
 
-### 1. Test the Framework
+### Installation
+
+#### Using uv (Recommended)
 
 ```bash
-python test_framework.py
+# Clone the repository
+git clone https://github.com/gol2em/Wzlz.git
+cd Wzlz
+
+# Run tests (uv will automatically install dependencies)
+uv run python tests/test_framework.py
+```
+
+#### Using pip
+
+```bash
+# Clone the repository
+git clone https://github.com/gol2em/Wzlz.git
+cd Wzlz
+
+# Install the package
+pip install -e .
+
+# Or with game client support
+pip install -e ".[game-client]"
+
+# Run tests
+python tests/test_framework.py
 ```
 
 You should see:
@@ -48,11 +77,10 @@ ALL TESTS PASSED ✓
 ============================================================
 ```
 
-### 2. Try Simulation Training
+### Basic Usage
 
 ```python
-from game_environment import SimulationEnvironment
-from game_state import GameConfig
+from wzlz_ai import SimulationEnvironment, GameConfig
 
 # Create environment
 config = GameConfig(rows=9, cols=9, colors_count=7)
@@ -71,16 +99,14 @@ result = env.execute_move(moves[0])
 print(f"Score: {result.new_state.score}")
 ```
 
-### 3. Install Full Dependencies (for Game Client)
+### See More Examples
 
 ```bash
-pip install -r requirements.txt
-```
+# With uv
+uv run python examples/example_usage.py
 
-### 4. See More Examples
-
-```bash
-python example_usage.py
+# With pip
+python examples/example_usage.py
 ```
 
 ## 📚 Documentation
@@ -92,13 +118,13 @@ python example_usage.py
 
 To interact with the actual game:
 
-1. Open the game (五子连珠5.2)
-2. Measure the board position and cell size
-3. Calibrate the client:
+1. Install game client dependencies: `pip install -e ".[game-client]"`
+2. Open the game (五子连珠5.2)
+3. Measure the board position and cell size
+4. Calibrate the client:
 
 ```python
-from game_client import GameClientEnvironment
-from game_state import GameConfig
+from wzlz_ai import GameClientEnvironment, GameConfig
 
 config = GameConfig()
 env = GameClientEnvironment(config)
