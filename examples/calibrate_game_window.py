@@ -205,24 +205,33 @@ def manual_board_calibration(img):
     return None
 
 
-def detect_score_region(img_array, board_rect):
-    """Detect score region (top-left of window)."""
+def detect_score_regions(img_array, board_rect):
+    """Detect high score (top-left) and current score (top-right) regions."""
     print("\n" + "="*70)
-    print("STEP 3: Detect Score Region")
+    print("STEP 3: Detect Score Regions")
     print("="*70)
-    
-    # Score is typically in top-left, above the board
+
+    # Get image dimensions
+    img_h, img_w = img_array.shape[:2]
     board_x, board_y, board_w, board_h = board_rect
-    
-    # Estimate score region (left side, above board)
-    score_x = 20
-    score_y = 60
-    score_w = 100
-    score_h = 40
-    
-    print(f"\n✓ Score region: ({score_x}, {score_y}, {score_w}, {score_h})")
-    
-    return (score_x, score_y, score_w, score_h)
+
+    # High score region (top-left, above board)
+    high_score_x = 20
+    high_score_y = 60
+    high_score_w = 100
+    high_score_h = 40
+
+    # Current score region (top-right, above board)
+    current_score_x = img_w - 120
+    current_score_y = 60
+    current_score_w = 100
+    current_score_h = 40
+
+    print(f"\n✓ High score region (top-left): ({high_score_x}, {high_score_y}, {high_score_w}, {high_score_h})")
+    print(f"✓ Current score region (top-right): ({current_score_x}, {current_score_y}, {current_score_w}, {current_score_h})")
+
+    return (high_score_x, high_score_y, high_score_w, high_score_h), \
+           (current_score_x, current_score_y, current_score_w, current_score_h)
 
 
 def detect_next_balls_region(img_array, board_rect):
@@ -245,30 +254,31 @@ def detect_next_balls_region(img_array, board_rect):
     return (next_x, next_y, next_w, next_h)
 
 
-def save_calibration(hwnd, board_rect, score_rect, next_balls_rect, window_rect):
+def save_calibration(hwnd, board_rect, high_score_rect, current_score_rect, next_balls_rect, window_rect):
     """Save calibration data to file."""
     print("\n" + "="*70)
     print("STEP 5: Save Calibration")
     print("="*70)
-    
+
     calibration = {
         'window_title': win32gui.GetWindowText(hwnd),
         'window_rect': window_rect,
         'board_rect': board_rect,
-        'score_rect': score_rect,
+        'high_score_rect': high_score_rect,
+        'current_score_rect': current_score_rect,
         'next_balls_rect': next_balls_rect,
         'cell_size': (board_rect[2] / 9, board_rect[3] / 9)
     }
-    
+
     # Save to file
     config_file = Path('game_window_config.json')
     with open(config_file, 'w', encoding='utf-8') as f:
         json.dump(calibration, f, indent=2, ensure_ascii=False)
-    
+
     print(f"\n✓ Calibration saved to: {config_file}")
     print("\nCalibration data:")
     print(json.dumps(calibration, indent=2, ensure_ascii=False))
-    
+
     return calibration
 
 
@@ -309,14 +319,14 @@ def main():
             print("\n✗ Calibration failed!")
             return
     
-    # Step 3: Detect score region
-    score_rect = detect_score_region(img_array, board_rect)
-    
+    # Step 3: Detect score regions
+    high_score_rect, current_score_rect = detect_score_regions(img_array, board_rect)
+
     # Step 4: Detect next balls region
     next_balls_rect = detect_next_balls_region(img_array, board_rect)
-    
+
     # Step 5: Save calibration
-    calibration = save_calibration(hwnd, board_rect, score_rect, next_balls_rect, window_rect)
+    calibration = save_calibration(hwnd, board_rect, high_score_rect, current_score_rect, next_balls_rect, window_rect)
     
     # Visualize calibration
     print("\n" + "="*70)
@@ -326,12 +336,20 @@ def main():
     # Draw rectangles on image
     vis_img = img_array.copy()
     board_x, board_y, board_w, board_h = board_rect
-    score_x, score_y, score_w, score_h = score_rect
+    high_score_x, high_score_y, high_score_w, high_score_h = high_score_rect
+    current_score_x, current_score_y, current_score_w, current_score_h = current_score_rect
     next_x, next_y, next_w, next_h = next_balls_rect
-    
+
     cv2.rectangle(vis_img, (board_x, board_y), (board_x + board_w, board_y + board_h), (0, 255, 0), 2)
-    cv2.rectangle(vis_img, (score_x, score_y), (score_x + score_w, score_y + score_h), (255, 0, 0), 2)
+    cv2.rectangle(vis_img, (high_score_x, high_score_y), (high_score_x + high_score_w, high_score_y + high_score_h), (255, 0, 0), 2)
+    cv2.rectangle(vis_img, (current_score_x, current_score_y), (current_score_x + current_score_w, current_score_y + current_score_h), (255, 165, 0), 2)
     cv2.rectangle(vis_img, (next_x, next_y), (next_x + next_w, next_y + next_h), (0, 0, 255), 2)
+
+    # Add labels
+    cv2.putText(vis_img, "High Score", (high_score_x, high_score_y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 1)
+    cv2.putText(vis_img, "Current Score", (current_score_x, current_score_y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 165, 0), 1)
+    cv2.putText(vis_img, "Next Balls", (next_x, next_y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
+    cv2.putText(vis_img, "Board", (board_x, board_y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
     
     # Draw grid on board
     cell_w = board_w / 9

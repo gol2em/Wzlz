@@ -22,9 +22,14 @@ from wzlz_ai.game_environment import (
 
 try:
     from wzlz_ai.game_client import GameClientEnvironment
+    from wzlz_ai.game_state_reader import GameStateReader
+    from wzlz_ai.window_capture import WindowCapture, GameWindowConfig
 except ImportError:
     # Game client dependencies not installed
     GameClientEnvironment = None
+    GameStateReader = None
+    WindowCapture = None
+    GameWindowConfig = None
 
 __version__ = "0.1.0"
 
@@ -38,5 +43,8 @@ __all__ = [
     "GameEnvironment",
     "SimulationEnvironment",
     "GameClientEnvironment",
+    "GameStateReader",
+    "WindowCapture",
+    "GameWindowConfig",
 ]
 

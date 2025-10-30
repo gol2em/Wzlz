@@ -215,7 +215,8 @@ def main():
     
     print("✓ Configuration loaded")
     print(f"  Board: {config.board_rect}")
-    print(f"  Score: {config.score_rect}")
+    print(f"  High score: {config.high_score_rect}")
+    print(f"  Current score: {config.current_score_rect}")
     print(f"  Next balls: {config.next_balls_rect}")
     print(f"  Cell size: {config.cell_size}")
     
@@ -242,15 +243,19 @@ def main():
     
     # Extract regions
     print("\nExtracting regions...")
-    
+
     # Board
     board_img = capture.capture_region(config.board_rect)
     print(f"✓ Board: {board_img.shape[1]}×{board_img.shape[0]}")
-    
-    # Score
-    score_img = capture.capture_region(config.score_rect)
-    print(f"✓ Score: {score_img.shape[1]}×{score_img.shape[0]}")
-    
+
+    # High score
+    high_score_img = capture.capture_region(config.high_score_rect)
+    print(f"✓ High score: {high_score_img.shape[1]}×{high_score_img.shape[0]}")
+
+    # Current score
+    current_score_img = capture.capture_region(config.current_score_rect)
+    print(f"✓ Current score: {current_score_img.shape[1]}×{current_score_img.shape[0]}")
+
     # Next balls
     next_balls_img = capture.capture_region(config.next_balls_rect)
     print(f"✓ Next balls: {next_balls_img.shape[1]}×{next_balls_img.shape[0]}")
@@ -279,14 +284,18 @@ def main():
     print("\nDetecting next balls...")
     next_balls = detect_next_balls(next_balls_img)
     print(f"✓ Next balls: {[b.name for b in next_balls]}")
-    
-    # Read score (if pytesseract available)
-    print("\nReading score...")
+
+    # Read scores (if pytesseract available)
+    print("\nReading scores...")
     try:
-        score = read_score_ocr(score_img)
-        print(f"✓ Score: {score}")
+        high_score = read_score_ocr(high_score_img)
+        current_score = read_score_ocr(current_score_img)
+        print(f"✓ High score: {high_score}")
+        print(f"✓ Current score: {current_score}")
     except:
         print("⚠ OCR not available (install pytesseract)")
+        high_score = 0
+        current_score = 0
     
     # Visualize detection
     print("\nGenerating visualization...")
@@ -295,13 +304,15 @@ def main():
     # Save results
     cv2.imwrite('board_capture.png', cv2.cvtColor(board_img, cv2.COLOR_RGB2BGR))
     cv2.imwrite('board_detection.png', cv2.cvtColor(vis_img, cv2.COLOR_RGB2BGR))
-    cv2.imwrite('score_capture.png', cv2.cvtColor(score_img, cv2.COLOR_RGB2BGR))
+    cv2.imwrite('high_score_capture.png', cv2.cvtColor(high_score_img, cv2.COLOR_RGB2BGR))
+    cv2.imwrite('current_score_capture.png', cv2.cvtColor(current_score_img, cv2.COLOR_RGB2BGR))
     cv2.imwrite('next_balls_capture.png', cv2.cvtColor(next_balls_img, cv2.COLOR_RGB2BGR))
-    
+
     print("\n✓ Results saved:")
     print("  - board_capture.png")
     print("  - board_detection.png")
-    print("  - score_capture.png")
+    print("  - high_score_capture.png")
+    print("  - current_score_capture.png")
     print("  - next_balls_capture.png")
     
     print("\n" + "="*70)

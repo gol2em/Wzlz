@@ -130,41 +130,43 @@ class WindowCapture:
 
 class GameWindowConfig:
     """Configuration for game window regions."""
-    
+
     def __init__(self, config_file: Optional[str] = None):
         """
         Initialize configuration.
-        
+
         Args:
             config_file: Path to JSON configuration file
         """
         self.board_rect: Optional[Tuple[int, int, int, int]] = None
-        self.score_rect: Optional[Tuple[int, int, int, int]] = None
+        self.high_score_rect: Optional[Tuple[int, int, int, int]] = None  # Top-left
+        self.current_score_rect: Optional[Tuple[int, int, int, int]] = None  # Top-right
         self.next_balls_rect: Optional[Tuple[int, int, int, int]] = None
         self.cell_size: Optional[Tuple[float, float]] = None
-        
+
         if config_file:
             self.load(config_file)
     
     def load(self, config_file: str) -> bool:
         """
         Load configuration from JSON file.
-        
+
         Args:
             config_file: Path to configuration file
-            
+
         Returns:
             True if loaded successfully
         """
         try:
             with open(config_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-            
+
             self.board_rect = tuple(data['board_rect'])
-            self.score_rect = tuple(data['score_rect'])
+            self.high_score_rect = tuple(data.get('high_score_rect', data.get('score_rect')))
+            self.current_score_rect = tuple(data.get('current_score_rect', [0, 0, 0, 0]))
             self.next_balls_rect = tuple(data['next_balls_rect'])
             self.cell_size = tuple(data['cell_size'])
-            
+
             return True
         except Exception as e:
             print(f"Failed to load config: {e}")
@@ -173,24 +175,25 @@ class GameWindowConfig:
     def save(self, config_file: str) -> bool:
         """
         Save configuration to JSON file.
-        
+
         Args:
             config_file: Path to configuration file
-            
+
         Returns:
             True if saved successfully
         """
         try:
             data = {
                 'board_rect': self.board_rect,
-                'score_rect': self.score_rect,
+                'high_score_rect': self.high_score_rect,
+                'current_score_rect': self.current_score_rect,
                 'next_balls_rect': self.next_balls_rect,
                 'cell_size': self.cell_size
             }
-            
+
             with open(config_file, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
-            
+
             return True
         except Exception as e:
             print(f"Failed to save config: {e}")
@@ -200,7 +203,8 @@ class GameWindowConfig:
         """Check if configuration is valid."""
         return all([
             self.board_rect is not None,
-            self.score_rect is not None,
+            self.high_score_rect is not None,
+            self.current_score_rect is not None,
             self.next_balls_rect is not None,
             self.cell_size is not None
         ])

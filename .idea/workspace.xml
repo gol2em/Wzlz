@@ -4,7 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="edecd0d8-0bc3-413c-96c3-3df03dd0a238" name="Changes" comment="" />
+    <list default="true" id="edecd0d8-0bc3-413c-96c3-3df03dd0a238" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/examples/calibrate_game_window.py" beforeDir="false" afterPath="$PROJECT_DIR$/examples/calibrate_game_window.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/test_image_capture.py" beforeDir="false" afterPath="$PROJECT_DIR$/examples/test_image_capture.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wzlz_ai/window_capture.py" beforeDir="false" afterPath="$PROJECT_DIR$/wzlz_ai/window_capture.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
