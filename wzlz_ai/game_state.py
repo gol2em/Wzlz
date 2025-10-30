@@ -197,7 +197,7 @@ class GameConfig:
     colors_count: int = 7  # Number of different ball colors
     match_length: int = 5  # Number of balls needed to match
     balls_per_turn: int = 3  # Number of new balls added each turn
-    initial_balls: int = 3  # Number of balls at game start
+    initial_balls: int = 5  # Number of balls at game start
     
     def validate(self) -> bool:
         """Validate the configuration."""
