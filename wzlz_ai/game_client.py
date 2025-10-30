@@ -339,9 +339,108 @@ class GameClientEnvironment(GameEnvironment):
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, x, y, 0, 0)
         time.sleep(0.1)
 
+    def _is_cell_selected(self, row: int, col: int, debug: bool = False) -> bool:
+        """
+        Check if a cell has a selected ball (bouncing).
+
+        A selected ball bounces, which causes the cell image to change between frames.
+        We capture the cell rapidly several times and check if any images differ.
+        If the cell is not selected, all captures should be exactly the same.
+
+        Args:
+            row: Row index (0-8)
+            col: Column index (0-8)
+            debug: If True, print debug information
+
+        Returns:
+            True if cell has a selected ball (bouncing), False otherwise
+        """
+        # Capture cell image rapidly multiple times
+        images = []
+        for i in range(5):
+            img = self._get_cell_image(row, col)
+            if img is None:
+                return False
+            images.append(img)
+            time.sleep(0.02)  # Very short delay (20ms) for rapid capture
+
+        # Compare all pairs of images
+        max_diff = 0
+        for i in range(len(images)):
+            for j in range(i + 1, len(images)):
+                # Calculate pixel-wise difference
+                diff = np.abs(images[i].astype(float) - images[j].astype(float))
+                mean_diff = np.mean(diff)
+                max_diff = max(max_diff, mean_diff)
+
+                if debug:
+                    print(f"  Image {i} vs {j}: mean diff = {mean_diff:.2f}")
+
+        if debug:
+            print(f"  Max difference: {max_diff:.2f}")
+
+        # If max difference is above threshold, the cell is changing (ball is bouncing)
+        # If not selected, all images should be identical (diff = 0)
+        # Threshold should be low since we're looking for any change
+        return max_diff > 2.0  # Adjust if needed
+
+    def _get_cell_image(self, row: int, col: int) -> Optional[np.ndarray]:
+        """
+        Get the image of a cell.
+
+        Args:
+            row: Row index (0-8)
+            col: Column index (0-8)
+
+        Returns:
+            Cell image (BGR), or None if failed
+        """
+        # Capture the board
+        img = self._capture_board_image()
+        if img is None:
+            return None
+
+        h, w = img.shape[:2]
+        cell_h = h / 9
+        cell_w = w / 9
+
+        # Get cell region
+        y1 = int(row * cell_h)
+        y2 = int((row + 1) * cell_h)
+        x1 = int(col * cell_w)
+        x2 = int((col + 1) * cell_w)
+
+        cell_img = img[y1:y2, x1:x2]
+
+        return cell_img
+
+    def _get_cell_color(self, row: int, col: int) -> np.ndarray:
+        """
+        Get the average color of a cell.
+
+        Args:
+            row: Row index (0-8)
+            col: Column index (0-8)
+
+        Returns:
+            Average BGR color of the cell
+        """
+        cell_img = self._get_cell_image(row, col)
+        if cell_img is None:
+            return np.array([0, 0, 0])
+
+        # Get average color
+        avg_color = np.mean(cell_img, axis=(0, 1))
+
+        return avg_color
+
     def execute_move(self, move: Move) -> MoveResult:
         """
         Execute a move by simulating mouse clicks.
+
+        Simple logic:
+        1. Click on source ball (always selects it, regardless of previous state)
+        2. Click on destination
 
         After each move, presses Enter twice to dismiss any popups that might appear.
         If the ball count drops to 5, the game has reset (popup was dismissed).
@@ -363,15 +462,11 @@ class GameClientEnvironment(GameEnvironment):
         from_x, from_y = self._cell_to_screen_coords(move.from_pos.row, move.from_pos.col)
         to_x, to_y = self._cell_to_screen_coords(move.to_pos.row, move.to_pos.col)
 
-        # Deselect any selected ball
+        # Click on source ball to select it
         self._click_at(from_x, from_y)
-        time.sleep(0.2)
-        self._click_at(from_x, from_y)
-        time.sleep(0.2)
+        time.sleep(0.3)  # Wait for bounce animation
 
-        # Select and move
-        self._click_at(from_x, from_y)
-        time.sleep(0.4)
+        # Click on destination to move
         self._click_at(to_x, to_y)
 
         # Wait for move animation + new balls
