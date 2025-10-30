@@ -8,6 +8,75 @@ from wzlz_ai import SimulationEnvironment, GameConfig, GameState, Position, Move
 import numpy as np
 
 
+def test_path_only_horizontal_vertical():
+    """Test that paths can only be horizontal/vertical, not diagonal."""
+    config = GameConfig()
+    env = SimulationEnvironment(config, seed=42)
+    state = env.reset()
+
+    # Create a scenario where diagonal would be shorter but is blocked
+    # Clear the board first
+    for row in range(9):
+        for col in range(9):
+            state.set_cell(Position(row, col), BallColor.EMPTY)
+
+    state.set_cell(Position(0, 0), BallColor.RED)
+
+    # Block diagonal path with a ball at (1, 1)
+    state.set_cell(Position(1, 1), BallColor.BLUE)
+
+    env._current_state = state
+
+    # Try to move to (2, 2) - should go around the obstacle
+    path_exists, path = env.is_path_clear(Position(0, 0), Position(2, 2), state)
+
+    print(f"Path exists: {path_exists}")
+    print(f"Path length: {len(path) if path_exists else 0}")
+    print(f"Path: {path if path_exists else 'None'}")
+
+    # Path should exist but be longer than diagonal (which would be 3 steps)
+    assert path_exists, "Path should exist going around obstacle"
+    # Diagonal would be 3 steps, but we need to go around, so at least 5 steps
+    assert len(path) >= 5, f"Path should be at least 5 steps (going around), got {len(path)}"
+
+    # Verify path only uses horizontal/vertical moves
+    for i in range(len(path) - 1):
+        curr = path[i]
+        next_pos = path[i + 1]
+        row_diff = abs(next_pos.row - curr.row)
+        col_diff = abs(next_pos.col - curr.col)
+
+        # Only one of row_diff or col_diff should be 1, the other should be 0
+        assert (row_diff == 1 and col_diff == 0) or (row_diff == 0 and col_diff == 1), \
+            f"Path contains diagonal move from {curr} to {next_pos}"
+
+    print("✓ Path only uses horizontal/vertical moves")
+
+
+def test_game_mode_with_preview():
+    """Test game mode with next ball preview."""
+    config = GameConfig(show_next_balls=True)
+    env = SimulationEnvironment(config, seed=42)
+
+    state = env.reset()
+
+    # Should have next balls preview
+    assert len(state.next_balls) == 3, f"Should have 3 next balls, got {len(state.next_balls)}"
+    print(f"✓ Mode with preview: next_balls = {[b.name for b in state.next_balls]}")
+
+
+def test_game_mode_without_preview():
+    """Test game mode without next ball preview."""
+    config = GameConfig(show_next_balls=False)
+    env = SimulationEnvironment(config, seed=42)
+
+    state = env.reset()
+
+    # Should NOT have next balls preview
+    assert len(state.next_balls) == 0, f"Should have 0 next balls, got {len(state.next_balls)}"
+    print("✓ Mode without preview: next_balls = []")
+
+
 def test_horizontal_match():
     """Test horizontal line matching."""
     print("\n" + "="*60)

@@ -198,7 +198,8 @@ class GameConfig:
     match_length: int = 5  # Number of balls needed to match
     balls_per_turn: int = 3  # Number of new balls added each turn
     initial_balls: int = 5  # Number of balls at game start
-    
+    show_next_balls: bool = True  # Whether to show preview of next balls (game mode)
+
     def validate(self) -> bool:
         """Validate the configuration."""
         if self.rows <= 0 or self.cols <= 0:

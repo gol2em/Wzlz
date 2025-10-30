@@ -139,13 +139,16 @@ class SimulationEnvironment(GameEnvironment):
         """Reset the game to initial state."""
         # Create empty board
         state = GameState.create_empty(self.config.rows, self.config.cols)
-        
+
         # Add initial balls
         self._add_random_balls(state, self.config.initial_balls)
-        
-        # Generate next balls preview
-        state.next_balls = self._generate_next_balls()
-        
+
+        # Generate next balls preview (only if enabled)
+        if self.config.show_next_balls:
+            state.next_balls = self._generate_next_balls()
+        else:
+            state.next_balls = []
+
         self._current_state = state
         return state.clone()
     
@@ -198,10 +201,13 @@ class SimulationEnvironment(GameEnvironment):
 
         # Update score (only from player's move matches, not auto-matches)
         new_state.score += points_earned
-        
-        # Generate next balls
-        new_state.next_balls = self._generate_next_balls()
-        
+
+        # Generate next balls (only if enabled)
+        if self.config.show_next_balls:
+            new_state.next_balls = self._generate_next_balls()
+        else:
+            new_state.next_balls = []
+
         # Check if game is over
         new_state.game_over = self.is_game_over(new_state)
         

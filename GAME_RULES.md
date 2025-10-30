@@ -6,6 +6,20 @@ This document describes the complete game rules implementation for the Wzlz (五
 
 Wzlz is a puzzle game played on a 9×9 grid where the player moves colored balls to create lines of 5 or more matching balls.
 
+## Game Modes
+
+The game has **two modes**:
+
+1. **Mode 1: With Next Ball Preview** (`show_next_balls=True`)
+   - Shows the colors of the next 3 balls that will be added
+   - Allows strategic planning
+   - Easier difficulty
+
+2. **Mode 2: Without Preview** (`show_next_balls=False`)
+   - Next ball colors are hidden
+   - More challenging
+   - Requires different strategy
+
 ## Complete Rules
 
 ### 1. Board Setup
@@ -19,7 +33,8 @@ Wzlz is a puzzle game played on a 9×9 grid where the player moves colored balls
 - A move consists of selecting a ball and moving it to an empty cell
 - The ball can only move along a **clear path** (no other balls blocking the way)
 - Pathfinding uses BFS (Breadth-First Search) to find valid paths
-- Movement is allowed horizontally, vertically, and diagonally
+- **Movement is ONLY horizontal and vertical** (4 directions: up, down, left, right)
+- **NO diagonal movement allowed**
 
 #### After Each Move
 1. **Check for matches** at the destination position
@@ -103,13 +118,23 @@ A valid move requires:
 
 ```python
 GameConfig(
-    rows=9,              # Board height
-    cols=9,              # Board width
-    colors_count=7,      # Number of different colors
-    match_length=5,      # Minimum balls to match
-    balls_per_turn=3,    # Balls added after each move
-    initial_balls=5      # Starting balls
+    rows=9,                  # Board height
+    cols=9,                  # Board width
+    colors_count=7,          # Number of different colors
+    match_length=5,          # Minimum balls to match
+    balls_per_turn=3,        # Balls added after each move
+    initial_balls=5,         # Starting balls
+    show_next_balls=True     # Show next ball preview (game mode)
 )
+```
+
+**Game Modes:**
+```python
+# Mode 1: With preview (easier)
+config_easy = GameConfig(show_next_balls=True)
+
+# Mode 2: Without preview (harder)
+config_hard = GameConfig(show_next_balls=False)
 ```
 
 ## Testing
