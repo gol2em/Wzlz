@@ -13,8 +13,8 @@ import json
 from pathlib import Path
 import sys
 
-# Add examples directory to path for unified_capture
-sys.path.insert(0, str(Path(__file__).parent.parent / 'examples'))
+# Add root directory to path for unified_capture
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 try:
     import win32gui
@@ -153,16 +153,89 @@ class GameClientEnvironment(GameEnvironment):
             for col in range(9):
                 board_int[row, col] = board[row, col].value
 
+        # Read score and next_balls using calibrated regions
+        score = self._read_current_score()
+        next_balls = self._read_next_balls()
+
         # Create game state
-        # Note: We can't read score and next_balls from the window yet
-        # TODO: Implement score and next_balls reading
         state = GameState(
             board=board_int,
-            score=0,  # Placeholder
-            next_balls=[]  # Placeholder
+            score=score,
+            next_balls=next_balls if next_balls else []
         )
 
         return state
+
+    def _read_current_score(self) -> int:
+        """Read current score from the window using calibrated region."""
+        if 'current_score_rect' not in self.window_config:
+            return 0
+
+        try:
+            # Capture full window
+            img = capture_game_window(self.window_title, bring_to_front=False)
+            if img is None:
+                return 0
+
+            # Extract score region (img is BGR from unified_capture)
+            x, y, w, h = self.window_config['current_score_rect']
+            score_img = img[y:y+h, x:x+w]
+
+            # Use OCR to read score
+            return self._read_score_ocr(score_img)
+        except Exception as e:
+            return 0
+
+    def _read_next_balls(self) -> List[int]:
+        """Read next balls preview from the window using calibrated region."""
+        if 'next_balls_rect' not in self.window_config:
+            return []
+
+        try:
+            # Capture full window
+            img = capture_game_window(self.window_title, bring_to_front=False)
+            if img is None:
+                return []
+
+            # Extract next balls region (img is BGR from unified_capture)
+            x, y, w, h = self.window_config['next_balls_rect']
+            next_balls_img = img[y:y+h, x:x+w]
+
+            # Detect next balls
+            next_balls = self._detect_next_balls(next_balls_img)
+
+            # Convert BallColor enums to int values
+            return [ball.value for ball in next_balls]
+        except Exception as e:
+            return []
+
+    def _read_score_ocr(self, score_img: np.ndarray) -> int:
+        """Read score from score region using simple pattern matching."""
+        # For now, return 0 as placeholder
+        # TODO: Implement OCR or template matching
+        return 0
+
+    def _detect_next_balls(self, next_balls_img: np.ndarray) -> List[BallColor]:
+        """Detect next ball colors from preview region."""
+        # Divide into 3 regions (3 balls)
+        h, w = next_balls_img.shape[:2]
+        ball_width = w // 3
+
+        next_balls = []
+
+        for i in range(3):
+            x1 = i * ball_width
+            x2 = (i + 1) * ball_width
+            ball_region = next_balls_img[:, x1:x2]
+
+            # Get average color (BGR)
+            avg_color = np.mean(ball_region, axis=(0, 1))
+
+            # Detect color
+            ball_color = self._detect_ball_color(avg_color)
+            next_balls.append(ball_color)
+
+        return next_balls
 
     def _bring_window_to_front(self):
         """Bring the game window to front and ensure it's focused."""

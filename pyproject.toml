@@ -32,6 +32,9 @@ game-client = [
     "opencv-python>=4.5.0",
     "pywin32>=300; platform_system=='Windows'",
 ]
+memory-reading = [
+    "pymem>=1.10.0; platform_system=='Windows'",
+]
 dev = [
     "pytest>=7.0.0",
     "black>=22.0.0",

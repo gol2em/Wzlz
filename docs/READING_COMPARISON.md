@@ -6,16 +6,20 @@ This document compares image-based and memory-based approaches for reading game 
 
 | Feature | Image Reading | Memory Reading |
 |---------|--------------|----------------|
-| **Speed** | ~100-200ms | <1ms |
+| **Speed** | ~100-200ms | ~1-5ms |
 | **Accuracy** | 95-99% | 100% |
-| **Setup Time** | 1-2 hours | 1-2 days |
-| **Maintenance** | Low | High |
-| **Game Updates** | ✓ Still works | ✗ Breaks |
-| **Legal/Safe** | ✓ Yes | ⚠ Gray area |
-| **Complexity** | Low | High |
+| **Setup Time** | 1-2 hours | 30 min - 2 hours* |
+| **Maintenance** | Low | Medium** |
+| **Game Updates** | ✓ Still works | ⚠ May break |
+| **Legal/Safe** | ✓ Yes | ✓ Yes (standalone) |
+| **Complexity** | Low | Medium |
 | **Background** | ✗ Needs visible window | ✓ Can run hidden |
 | **Cross-platform** | ✓ Yes | ✗ Windows only |
-| **Learning Value** | High | Medium |
+| **Learning Value** | High | High |
+| **Implementation** | ✓ Included | ✓ Included |
+
+\* With the new automated exploration tool
+\*\* Addresses may need to be rediscovered after game restarts
 
 ## Detailed Comparison
 
@@ -76,26 +80,26 @@ state = game_client.get_state()
 
 #### Implementation Steps
 ```python
-# 1. Reverse engineer (complex)
-# - Use Cheat Engine or similar
-# - Find board array in memory
-# - Find score variable
-# - Document memory layout
+# 1. Install dependencies
+pip install pymem
 
-# 2. Implement reader
-import ctypes
-from ctypes import wintypes
+# 2. Discover addresses (automated tool)
+python examples/explore_memory.py
+# - Attach to game process
+# - Use screen reader to compare values
+# - Find and verify addresses
+# - Save to file
 
-def read_memory(process_handle, address, size):
-    buffer = ctypes.create_string_buffer(size)
-    ctypes.windll.kernel32.ReadProcessMemory(
-        process_handle, address, buffer, size, None
-    )
-    return buffer.raw
+# 3. Use memory reader
+from wzlz_ai.memory_reader import GameMemoryReader
 
-# 3. Parse data
-board_data = read_memory(handle, board_address, 81)
-board = parse_board_data(board_data)
+reader = GameMemoryReader(process_name="wzlz.exe")
+reader.attach()
+reader.board_address = 0x12AB3450  # From exploration
+reader.score_address = 0x12AB3500  # From exploration
+
+# 4. Read game state
+state = reader.read_game_state()
 ```
 
 #### Pros
@@ -106,13 +110,11 @@ board = parse_board_data(board_data)
 - ✅ **Efficient** - minimal CPU usage
 
 #### Cons
-- ❌ **Complex** - requires reverse engineering
-- ❌ **Game-specific** - breaks with updates
-- ❌ **Platform-specific** - Windows only (usually)
-- ❌ **Legal concerns** - may violate ToS
-- ❌ **Anti-cheat** - may be detected
-- ❌ **Time-consuming** - days to weeks of work
-- ❌ **Maintenance** - needs updates when game updates
+- ❌ **Platform-specific** - Windows only
+- ❌ **Game-specific** - may break with updates
+- ❌ **Address instability** - may need rediscovery after restarts
+- ❌ **Initial setup** - requires finding addresses first
+- ❌ **Maintenance** - addresses may change with game updates
 
 #### Best For
 - ✓ Real-time performance requirements
@@ -123,35 +125,44 @@ board = parse_board_data(board_data)
 
 ## Recommendation for Your Project
 
-### Use Image Reading Because:
+### NEW: Both Methods Now Available!
 
-1. **Your Goal**: Validate game rules and train AI
-   - Speed: 100-200ms is acceptable for validation
-   - You're not playing competitively in real-time
+With the new automated memory exploration tool, both methods are now practical:
 
-2. **Maintainability**: 
-   - Won't break when game updates
-   - Easy to fix if something changes
+### Use Image Reading When:
 
-3. **Learning**:
-   - Good practice for computer vision
-   - Transferable skills to other projects
+1. **Starting out** - easier to understand and debug
+2. **Long-term stability** - won't break with game updates
+3. **Learning focus** - good practice for computer vision
+4. **Cross-platform** - if you might switch OS
 
-4. **Time Investment**:
-   - 1-2 hours to get working
-   - vs 1-2 days for memory reading
+### Use Memory Reading When:
 
-5. **Safety**:
-   - No legal/ethical concerns
-   - No risk of anti-cheat detection
+1. **Performance critical** - need 10-100x faster reads
+2. **High-frequency training** - reading state thousands of times
+3. **Background operation** - want to minimize/hide game window
+4. **Accuracy critical** - need 100% reliable reads
 
-### When to Consider Memory Reading:
+### Recommended Approach: Start with Image, Add Memory Later
 
-Only if you encounter these issues:
-- Image recognition accuracy <90%
-- Need >10 moves/second
-- Game runs fullscreen only
-- Have experience with reverse engineering
+1. **Week 1**: Set up image reading
+   - Get familiar with the framework
+   - Validate game rules
+   - Build initial AI
+
+2. **Week 2+**: Add memory reading
+   - Run `explore_memory.py` to find addresses
+   - Use for high-performance training
+   - Keep image reading as fallback
+
+3. **Production**: Hybrid approach
+   ```python
+   # Try memory first, fall back to image
+   if memory_reader.attach():
+       state = memory_reader.read_game_state()
+   else:
+       state = image_reader.read_game_state()
+   ```
 
 ## Hybrid Approach (Recommended)
 
@@ -230,48 +241,71 @@ move = Move(Position(0, 0), Position(0, 1))
 result = env.execute_move(move)
 ```
 
-### Memory Reading (Complex)
+### Memory Reading (Now Simple!)
 ```python
-import ctypes
-from ctypes import wintypes
+from wzlz_ai.memory_reader import GameMemoryReader
 
-# Find process
-process = find_process("wzlz.exe")
-handle = open_process(process.pid)
+# Setup (one-time: run explore_memory.py to find addresses)
+reader = GameMemoryReader(process_name="wzlz.exe")
+reader.attach()
 
-# Read board (example addresses - need to find these)
-BOARD_ADDRESS = 0x12345678
-board_data = read_memory(handle, BOARD_ADDRESS, 81)
+# Set discovered addresses
+reader.board_address = 0x12AB3450
+reader.score_address = 0x12AB3500
 
-# Parse board
-board = np.frombuffer(board_data, dtype=np.uint8).reshape(9, 9)
-
-# Read score
-SCORE_ADDRESS = 0x87654321
-score_data = read_memory(handle, SCORE_ADDRESS, 4)
-score = int.from_bytes(score_data, 'little')
+# Read state (fast!)
+state = reader.read_game_state()
+print(f"Score: {state.score}")
+print(f"Board: {state.board}")
 ```
 
 ## Conclusion
 
-**For your project, start with image reading:**
+**NEW: You now have both options available!**
 
-1. ✅ Faster to implement (hours vs days)
-2. ✅ More maintainable (won't break)
-3. ✅ Sufficient speed (100-200ms is fine)
-4. ✅ Safer and legal
-5. ✅ Better learning experience
+### Quick Start Path
 
-**Only consider memory reading if:**
-- Image reading fails (<90% accuracy)
-- You need real-time performance (>10 moves/sec)
-- You have reverse engineering experience
-- You're willing to maintain it
+1. **Week 1**: Image reading
+   - Easy setup and debugging
+   - Learn the framework
+   - Validate game rules
 
-**Best approach:**
-- Use **simulation** for training (fast, controlled)
-- Use **image reading** for validation (accurate enough)
-- Focus on building great AI, not perfect reading
+2. **Week 2**: Add memory reading
+   - Run `explore_memory.py` (30 min)
+   - Get 10-100x performance boost
+   - Use for intensive training
 
-The goal is to train AI to play the game, not to build the perfect game reader. Image reading is good enough for that purpose!
+### Recommended Strategy
+
+```python
+# Best of both worlds
+class HybridGameReader:
+    def __init__(self):
+        self.memory_reader = GameMemoryReader()
+        self.image_reader = GameStateReader()
+        self.use_memory = self.memory_reader.attach()
+
+    def read_state(self):
+        if self.use_memory:
+            state = self.memory_reader.read_game_state()
+            if state:
+                return state
+        # Fallback to image
+        return self.image_reader.read_game_state()
+```
+
+### Performance Tiers
+
+- **Simulation**: Millions of games/hour (training)
+- **Memory Reading**: Thousands of games/hour (validation)
+- **Image Reading**: Hundreds of games/hour (testing)
+
+### Getting Started
+
+1. **Install**: `pip install pymem`
+2. **Explore**: `python examples/explore_memory.py`
+3. **Test**: `python examples/test_memory_reading.py`
+4. **Integrate**: Use `GameMemoryReader` in your code
+
+See [MEMORY_READING_GUIDE.md](MEMORY_READING_GUIDE.md) for detailed instructions!
 

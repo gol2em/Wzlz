@@ -85,8 +85,7 @@ class GameStateReader:
         state = GameState(
             board=board,
             score=current_score,
-            next_balls=next_balls if next_balls else [],
-            config=game_config
+            next_balls=next_balls if next_balls else []
         )
         
         return state

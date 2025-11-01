@@ -49,8 +49,15 @@ def main():
     # Get initial state
     state = env.get_state()
     ball_count = sum(1 for row in range(9) for col in range(9) if state.board[row, col] != 0)
-    
-    print(f"\nInitial state: {ball_count} balls, score: {state.score}")
+
+    # Format next balls
+    next_balls_str = "None"
+    if state.next_balls:
+        from wzlz_ai.game_state import BallColor
+        colors = [BallColor(c).name for c in state.next_balls]
+        next_balls_str = ", ".join(colors)
+
+    print(f"\nInitial state: {ball_count} balls, score: {state.score}, next: [{next_balls_str}]")
     
     # Play until game over
     print("\n" + "="*70)
@@ -88,7 +95,15 @@ def main():
             # Print progress every 10 moves
             if move_count % 10 == 0:
                 ball_count = sum(1 for row in range(9) for col in range(9) if state.board[row, col] != 0)
-                print(f"Move {move_count}: {ball_count} balls, score: {state.score}")
+
+                # Format next balls
+                next_balls_str = "None"
+                if state.next_balls:
+                    from wzlz_ai.game_state import BallColor
+                    colors = [BallColor(c).name for c in state.next_balls]
+                    next_balls_str = ", ".join(colors)
+
+                print(f"Move {move_count}: {ball_count} balls, score: {state.score}, next: [{next_balls_str}]")
 
         except Exception as e:
             print(f"\n⚠ Error on move {move_count}: {e}")
@@ -99,7 +114,15 @@ def main():
     # Final state
     if state is not None:
         ball_count = sum(1 for row in range(9) for col in range(9) if state.board[row, col] != 0)
-        print(f"\nFinal state: {ball_count} balls, score: {state.score}")
+
+        # Format next balls
+        next_balls_str = "None"
+        if state.next_balls:
+            from wzlz_ai.game_state import BallColor
+            colors = [BallColor(c).name for c in state.next_balls]
+            next_balls_str = ", ".join(colors)
+
+        print(f"\nFinal state: {ball_count} balls, score: {state.score}, next: [{next_balls_str}]")
     else:
         print(f"\nGame over after {move_count} moves (popup appeared)")
     
@@ -175,7 +198,15 @@ def main():
         state = result.new_state
 
         ball_count = sum(1 for row in range(9) for col in range(9) if state.board[row, col] != 0)
-        print(f"Move {i+1}: {ball_count} balls, score: {state.score}")
+
+        # Format next balls
+        next_balls_str = "None"
+        if state.next_balls:
+            from wzlz_ai.game_state import BallColor
+            colors = [BallColor(c).name for c in state.next_balls]
+            next_balls_str = ", ".join(colors)
+
+        print(f"Move {i+1}: {ball_count} balls, score: {state.score}, next: [{next_balls_str}]")
     
     print("\n" + "="*70)
     print("TEST COMPLETE!")

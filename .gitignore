@@ -137,3 +137,8 @@ Thumbs.db
 .uv/
 uv.lock
 
+# Debug and analysis files
+debug_*.png
+memory_analysis_results.json
+game_screenshot.png
+calibration_review.png

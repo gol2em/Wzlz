@@ -31,6 +31,13 @@ except ImportError:
     WindowCapture = None
     GameWindowConfig = None
 
+try:
+    from wzlz_ai.memory_reader import GameMemoryReader, MemoryScanner
+except ImportError:
+    # Memory reading dependencies not installed
+    GameMemoryReader = None
+    MemoryScanner = None
+
 __version__ = "0.1.0"
 
 __all__ = [
@@ -46,5 +53,7 @@ __all__ = [
     "GameStateReader",
     "WindowCapture",
     "GameWindowConfig",
+    "GameMemoryReader",
+    "MemoryScanner",
 ]
 

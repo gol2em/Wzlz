@@ -62,9 +62,9 @@ class WindowCapture:
     def capture(self) -> Optional[np.ndarray]:
         """
         Capture the current window content.
-        
+
         Returns:
-            Screenshot as numpy array (RGB), or None if failed
+            Screenshot as numpy array (BGR format for OpenCV), or None if failed
         """
         if not self.hwnd:
             if not self.find_window():
@@ -88,23 +88,24 @@ class WindowCapture:
             
             # Capture
             saveDC.BitBlt((0, 0), (width, height), mfcDC, (0, 0), win32con.SRCCOPY)
-            
-            # Convert to PIL Image
+
+            # Convert to numpy array (BGR format to match unified_capture.py)
             bmpinfo = saveBitMap.GetInfo()
             bmpstr = saveBitMap.GetBitmapBits(True)
-            img = Image.frombuffer(
-                'RGB',
-                (bmpinfo['bmWidth'], bmpinfo['bmHeight']),
-                bmpstr, 'raw', 'BGRX', 0, 1
-            )
-            
+
+            img = np.frombuffer(bmpstr, dtype=np.uint8)
+            img.shape = (height, width, 4)
+
+            # Convert BGRA to BGR (drop alpha channel)
+            img = img[:, :, :3]
+
             # Cleanup
             win32gui.DeleteObject(saveBitMap.GetHandle())
             saveDC.DeleteDC()
             mfcDC.DeleteDC()
             win32gui.ReleaseDC(self.hwnd, hwndDC)
-            
-            return np.array(img)
+
+            return img
             
         except Exception as e:
             print(f"Capture failed: {e}")
